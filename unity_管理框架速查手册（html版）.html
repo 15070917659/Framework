@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unity 管理框架速查手册</title>
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#121a2b; --muted:#a3b1c6; --text:#e6eefc; --accent:#7aa2ff; --accent2:#29d3a3; --border:#1e2a44;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 80% -20%, #1a2450 0%, rgba(26,36,80,0) 60%), var(--bg);
+      color:var(--text);
+    }
+    header{
+      padding:28px 20px 12px; border-bottom:1px solid var(--border);
+      position:sticky; top:0; backdrop-filter: saturate(120%) blur(6px); background:linear-gradient(180deg, rgba(11,16,32,.85), rgba(11,16,32,.55)); z-index:5;
+    }
+    .container{max-width:1000px; margin:0 auto; padding:24px 20px 64px}
+    h1{font-size:28px; margin:0 0 6px}
+    .subtitle{color:var(--muted); font-size:14px}
+    .grid{display:grid; grid-template-columns: 260px 1fr; gap:20px; margin-top:18px}
+    nav{position:sticky; top:84px; align-self:start; background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:12px}
+    nav h3{margin:4px 8px 8px; font-size:14px; color:var(--muted); font-weight:600}
+    nav a{display:block; padding:8px 10px; margin:2px 0; text-decoration:none; color:var(--text); border-radius:10px; font-size:14px; border:1px solid transparent}
+    nav a:hover{background:#0d1425; border-color:var(--border);}
+    nav a:focus{outline:2px solid var(--accent)}
+
+    .card{background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:14px 14px; margin-bottom:14px;}
+    .card h2{font-size:20px; margin:6px 8px 12px}
+
+    details{border:1px solid var(--border); border-radius:14px; margin:10px 6px; background:#0e1627}
+    summary{cursor:pointer; list-style:none; padding:12px 14px; font-weight:600; display:flex; align-items:center; gap:8px}
+    summary::before{content:"▶"; font-size:12px; color:var(--accent)}
+    details[open] summary::before{content:"▼"}
+    .section{padding:8px 14px 16px}
+
+    code, pre{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size:13px}
+    pre{margin:10px 0 0; padding:12px; background:#0a1222; border-radius:12px; border:1px solid var(--border); overflow:auto}
+    .api{display:grid; grid-template-columns: 280px 1fr; gap:14px; padding:10px}
+    .api .sig{font-weight:600; color:var(--accent2)}
+    .muted{color:var(--muted)}
+
+    .badge{display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid var(--border); color:var(--muted)}
+    .kbd{border:1px solid var(--border); background:#0b1323; padding:2px 6px; border-radius:6px; font-size:12px}
+
+    .hero{
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      border:1px solid var(--border); background:linear-gradient(180deg,#0f1730, #0b1328); border-radius:16px; padding:16px; margin-top:12px
+    }
+    .hero > div{flex:1}
+    .hero h2{margin:4px 0 6px; font-size:18px}
+    .hero p{margin:0; color:var(--muted); font-size:14px}
+    .hero .stat{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+    .hero .stat .pill{padding:6px 10px; border-radius:999px; background:#0a1222; border:1px solid var(--border); font-size:12px}
+
+    .toc-note{font-size:12px; color:var(--muted); padding:8px 10px}
+    .foot{margin-top:28px; color:var(--muted); font-size:12px}
+    .copy{margin-left:auto; border:1px solid var(--border); background:#091225; color:var(--text); border-radius:8px; padding:6px 10px; cursor:pointer}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Unity 管理框架速查手册</h1>
+    <div class="subtitle">涵盖 EventMgr / JsonMgr / PoolMgr / ResMgr / SceneMgr / SoundMgr / TimerMgr / UIMgr / BasePanel 等常用接口</div>
+    <div class="hero container">
+      <div>
+        <h2>如何使用</h2>
+        <p>按章节查找需要的模块，展开 <span class="kbd">details</span> 查看示例与方法签名，直接复制即可用。</p>
+        <div class="stat">
+          <span class="pill">API 速查</span>
+          <span class="pill">中文注释</span>
+          <span class="pill">面向 YooAsset</span>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <span class="badge">最后更新：<span id="today"></span></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container grid">
+    <nav>
+      <h3>目录</h3>
+      <a href="#pkg">1. 导入 YooAsset 包</a>
+      <a href="#assets">2. 导入框架资源包</a>
+      <a href="#eventmgr">3. EventMgr</a>
+      <a href="#jsonmgr">4. JsonMgr</a>
+      <a href="#poolmgr">5. PoolMgr</a>
+      <a href="#resmgr">6. ResMgr</a>
+      <a href="#scenemgr">7. SceneMgr</a>
+      <a href="#soundmgr">8. SoundMgr</a>
+      <a href="#timermgr">9. TimerMgr</a>
+      <a href="#uimgr">10. UIMgr</a>
+      <a href="#basepanel">11. BasePanel</a>
+      <div class="toc-note">Tip：点击条目快速跳转；每节可折叠。</div>
+    </nav>
+
+    <main>
+      <section id="pkg" class="card">
+        <h2>1. 导入 YooAsset 包</h2>
+        <details open>
+          <summary>OpenUPM 源配置</summary>
+          <div class="section">
+            <div class="api">
+              <div class="sig">名称</div>
+              <div>package.openupm.com</div>
+              <div class="sig">URL</div>
+              <div>https://package.openupm.com</div>
+              <div class="sig">Scope</div>
+              <div>com.tuyoogame.yooasset</div>
+            </div>
+            <pre><code>// Unity &gt; Project Settings &gt; Package Manager
+// 增加 Scoped Registry：
+// Name: package.openupm.com
+// URL:  https://package.openupm.com
+// Scope(s): com.tuyoogame.yooasset
+</code></pre>
+          </div>
+        </details>
+      </section>
+
+      <section id="assets" class="card">
+        <h2>2. 导入框架资源包</h2>
+        <details open>
+          <summary>说明</summary>
+          <div class="section">
+            <p class="muted">将提供的框架资源（脚本/预制体/配置）导入到工程中，确保 <code>ResMgr</code> 默认包名与实际一致。</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="eventmgr" class="card">
+        <h2>3. EventMgr</h2>
+        <details open>
+          <summary>3.1 添加事件监听（支持 0~2 个参数）</summary>
+          <div class="section">
+            <pre><code>EventMgr.Instance.AddListener("事件名", 回调函数);
+EventMgr.Instance.AddListener&lt;T&gt;("事件名", 回调函数);
+EventMgr.Instance.AddListener&lt;T, T&gt;("事件名", 回调函数);
+// 目前仅支持 0~2 个参数，后续可按需扩展。
+</code></pre>
+          </div>
+        </details>
+        <details>
+          <summary>3.2 移除事件监听</summary>
+          <div class="section">
+            <pre><code>EventMgr.Instance.RemoveListener("事件名", 回调函数);
+EventMgr.Instance.RemoveListener&lt;T&gt;("事件名", 回调函数);
+EventMgr.Instance.RemoveListener&lt;T, T&gt;("事件名", 回调函数);
+// 目前仅支持 0~2 个参数，后续可按需扩展。
+</code></pre>
+          </div>
+        </details>
+        <details>
+          <summary>3.3 触发事件</summary>
+          <div class="section">
+            <pre><code>EventMgr.Instance.TriggerEvent("事件名");
+EventMgr.Instance.TriggerEvent&lt;T&gt;("事件名", 参数);
+EventMgr.Instance.TriggerEvent&lt;T, T&gt;("事件名", 参数1, 参数2);
+// 目前仅支持 0~2 个参数，后续可按需扩展。
+</code></pre>
+          </div>
+        </details>
+      </section>
+
+      <section id="jsonmgr" class="card">
+        <h2>4. JsonMgr</h2>
+        <details open>
+          <summary>保存 / 加载</summary>
+          <div class="section">
+            <pre><code>// 保存数据
+JsonMgr.Instance.SaveData(object, 文件名);
+
+// 加载数据
+JsonMgr.Instance.LoadData&lt;T&gt;(文件名);
+</code></pre>
+          </div>
+        </details>
+      </section>
+
+      <section id="poolmgr" class="card">
+        <h2>5. PoolMgr</h2>
+        <details open>
+          <summary>对象池常用操作</summary>
+          <div class="section">
+            <pre><code>// 得到对象
+PoolMgr.Instance.GetObj(文件路径, 回调函数);
+
+// 失去对象（回收）
+PoolMgr.Instance.PushObj(对象);
+
+// 预加载对象
+PoolMgr.Instance.PreLoad(文件路径, 数量);
+</code></pre>
+          </div>
+        </details>
+      </section>
+
+      <section id="resmgr" class="card">
+        <h2>6. ResMgr</h2>
+        <details open>
+          <summary>资源加载与场景</summary>
+          <div class="section">
+            <pre><code>// 异步加载资源
+ResMgr.Instance.LoadAssetAsync&lt;T&gt;(文件路径, 回调函数, /* 可选 */ 包名);
+
+// 同步加载资源
+ResMgr.Instance.LoadAssetSync&lt;T&gt;(文件路径, /* 可选 */ 包名);
+
+// 异步加载所有资源
+ResMgr.Instance.LoadAllAssetAsync&lt;T&gt;(文件路径, 回调函数, /* 可选 */ 包名);
+
+// 异步加载场景
+ResMgr.Instance.LoadSceneAsync&lt;T&gt;(文件路径, /* 可选 */ 包名);
+
+// 卸载未使用的资源
+ResMgr.Instance.UnloadUnusedAssets&lt;T&gt;(包名);
+</code></pre>
+          </div>
+        </details>
+      </section>
+
+      <section id="scenemgr" class="card">
+        <h2>7. SceneMgr</h2>
+        <details open>
+          <summary>7.1 异步加载场景</summary>
+          <div class="section">
+            <pre><code>SceneMgr.Instance.LoadSceneAsync(场景名, /* 可选 */ 回调函数);
+</code></pre>
+          </div>
+        </details>
+      </section>
+
+      <section id="soundmgr" class="card">
+        <h2>8. SoundMgr</h2>
+        <details open>
+          <summary>音乐与音效控制</summary>
+          <div class="section">
+            <pre><code>// 播放背景音乐（默认循环）
+SoundMgr.Instance.PlayMusic(文件路径, /* 可选 */ 是否循环 = true);
+
+// 停止背景音乐
+SoundMgr.Instance.SlopMusic();
+
+// 播放音效（默认不循环）
+SoundMgr.Instance.PlaySound(文件路径, /* 可选 */ 是否循环 = false);
+
+// 播放一次性音效
+SoundMgr.Instance.PlayOneShot(文件路径, /* 可选 */ 是否循环 = false);
+
+// 停止指定 id 的音效
+SoundMgr.Instance.StopSound(id);
+
+// 停止所有音效
+SoundMgr.Instance.StopAllSound();
+
+// 设置音乐静音状态
+SoundMgr.Instance.SetMusicMute(是否静音);
+
+// 设置音效静音状态
+SoundMgr.Instance.SetSoundMute(是否静音);
+
+// 设置音乐音量（0~1）
+SoundMgr.Instance.SetMusicVolume(音量);
+
+// 设置音效音量（0~1）
+SoundMgr.Instance.SetSoundVolume(音量);
+</code></pre>
+          </div>
+        </details>
+      </section>
+
+      <section id="timermgr" class="card">
+        <h2>9. TimerMgr</h2>
+        <details open>
+          <summary>定时器接口</summary>
+          <div class="section">
+            <pre><code>// 创建定时器（重复次数, 循环间隔, 延迟时间, 回调）
+TimerMgr.Instance.Schedule(重复次数, 循环间隔时间, 延迟时间, 回调方法);
+
+// 一次性延迟执行
+TimerMgr.Instance.ScheduleOnce(延迟时间, 回调方法);
+
+// 取消定时器
+TimerMgr.Instance.StopSchedule(id);
+</code></pre>
+          </div>
+        </details>
+      </section>
+
+      <section id="uimgr" class="card">
+        <h2>10. UIMgr</h2>
+        <details open>
+          <summary>UI 面板管理</summary>
+          <div class="section">
+            <pre><code>// 显示面板（默认中层）
+UIMgr.Instance.ShowPanel&lt;T&gt;(/* 可选 */ 层级);
+
+// 隐藏面板（可选淡出）
+UIMgr.Instance.HidePanel&lt;T&gt;(/* 可选 */ 是否淡出);
+
+// 获取面板实例
+UIMgr.Instance.GetPanel&lt;T&gt;();
+</code></pre>
+          </div>
+        </details>
+      </section>
+
+      <section id="basepanel" class="card">
+        <h2>11. BasePanel</h2>
+        <details open>
+          <summary>使用方法与控件操作</summary>
+          <div class="section">
+            <pre><code>// 11.1 使用方法：所有面板需继承 BasePanel，面板名与类名一致
+
+// 11.2 获取控件
+GetControl&lt;T&gt;(控件名);
+
+// 11.3 给 Button 添加点击事件
+AddButtonListener(控件名, 回调方法);
+</code></pre>
+          </div>
+        </details>
+      </section>
+
+      <div class="foot">© 2025 Unity 管理框架速查手册 · 适用于快速查阅与拷贝代码片段</div>
+    </main>
+  </div>
+
+  <script>
+    // 更新今日日期显示
+    const d = new Date();
+    const fmt = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    document.getElementById('today').textContent = fmt;
+  </script>
+</body>
+</html>
